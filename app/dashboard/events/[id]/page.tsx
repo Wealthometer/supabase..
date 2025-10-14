@@ -1,19 +1,19 @@
-import { redirect, notFound } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { EventDetails } from "@/components/dashboard/event-details"
+import { redirect, notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { EventDetails } from "@/components/dashboard/event-details";
 
 export default async function EventPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = await params
-  const supabase = await createClient()
+  const { id } = await params;
+  const supabase = await createClient();
 
-  const { data: userData, error: userError } = await supabase.auth.getUser()
+  const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
-    redirect("/auth/login")
+    redirect("/auth/login");
   }
 
   const { data: event, error: eventError } = await supabase
@@ -21,10 +21,10 @@ export default async function EventPage({
     .select("*")
     .eq("id", id)
     .eq("created_by", userData.user.id)
-    .single()
+    .single();
 
   if (eventError || !event) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -36,5 +36,5 @@ export default async function EventPage({
         </div>
       </main>
     </div>
-  )
+  );
 }

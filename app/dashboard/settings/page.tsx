@@ -1,18 +1,22 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { SettingsForm } from "@/components/dashboard/settings-form"
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { SettingsForm } from "@/components/dashboard/settings-form";
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
-    redirect("/auth/login")
+    redirect("/auth/login");
   }
 
   // Get or create user preferences
-  const { data: preferences } = await supabase.from("user_preferences").select("*").eq("user_id", data.user.id).single()
+  const { data: preferences } = await supabase
+    .from("user_preferences")
+    .select("*")
+    .eq("user_id", data.user.id)
+    .single();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -24,5 +28,5 @@ export default async function SettingsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

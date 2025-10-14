@@ -1,0 +1,10 @@
+[build]
+  publish = ".next"
+  command = "npm run build"
+
+[dev]
+  command = "npm run dev"
+
+# Optional: Cache Next.js builds
+[cache]
+  base = ".next/cache"

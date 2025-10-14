@@ -1,14 +1,14 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { EventForm } from "@/components/dashboard/event-form"
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { EventForm } from "@/components/dashboard/event-form";
 
 export default async function NewEventPage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
-    redirect("/auth/login")
+    redirect("/auth/login");
   }
 
   return (
@@ -21,5 +21,5 @@ export default async function NewEventPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

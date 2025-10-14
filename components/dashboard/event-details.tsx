@@ -1,13 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar, Clock, MapPin, Edit, Trash2, MessageSquare } from "lucide-react"
-import { format, parseISO } from "date-fns"
-import Link from "next/link"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Edit,
+  Trash2,
+  MessageSquare,
+} from "lucide-react";
+import { format, parseISO } from "date-fns";
+import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,44 +25,48 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { TestNotificationButton } from "./test-notification-button"
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { TestNotificationButton } from "./test-notification-button";
 
 interface Event {
-  id: string
-  title: string
-  description: string | null
-  start_time: string
-  end_time: string
-  location: string | null
-  discord_channel_id: string | null
-  google_calendar_event_id: string | null
-  created_at: string
+  id: string;
+  title: string;
+  description: string | null;
+  start_time: string;
+  end_time: string;
+  location: string | null;
+  discord_channel_id: string | null;
+  google_calendar_event_id: string | null;
+  created_at: string;
 }
 
 interface EventDetailsProps {
-  event: Event
-  userId: string
+  event: Event;
+  userId: string;
 }
 
 export function EventDetails({ event, userId }: EventDetailsProps) {
-  const router = useRouter()
-  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    setIsDeleting(true)
-    const supabase = createClient()
+    setIsDeleting(true);
+    const supabase = createClient();
 
-    const { error } = await supabase.from("events").delete().eq("id", event.id).eq("created_by", userId)
+    const { error } = await supabase
+      .from("events")
+      .delete()
+      .eq("id", event.id)
+      .eq("created_by", userId);
 
     if (!error) {
-      router.push("/dashboard")
-      router.refresh()
+      router.push("/dashboard");
+      router.refresh();
     } else {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -79,7 +90,8 @@ export function EventDetails({ event, userId }: EventDetailsProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Event</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete this event? This action cannot be undone.
+                  Are you sure you want to delete this event? This action cannot
+                  be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -106,7 +118,9 @@ export function EventDetails({ event, userId }: EventDetailsProps) {
             <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div>
               <p className="font-medium">Date</p>
-              <p className="text-muted-foreground">{format(parseISO(event.start_time), "EEEE, MMMM d, yyyy")}</p>
+              <p className="text-muted-foreground">
+                {format(parseISO(event.start_time), "EEEE, MMMM d, yyyy")}
+              </p>
             </div>
           </div>
 
@@ -115,7 +129,8 @@ export function EventDetails({ event, userId }: EventDetailsProps) {
             <div>
               <p className="font-medium">Time</p>
               <p className="text-muted-foreground">
-                {format(parseISO(event.start_time), "h:mm a")} - {format(parseISO(event.end_time), "h:mm a")}
+                {format(parseISO(event.start_time), "h:mm a")} -{" "}
+                {format(parseISO(event.end_time), "h:mm a")}
               </p>
             </div>
           </div>
@@ -133,7 +148,9 @@ export function EventDetails({ event, userId }: EventDetailsProps) {
           {event.description && (
             <div>
               <p className="font-medium mb-2">Description</p>
-              <p className="text-muted-foreground whitespace-pre-wrap">{event.description}</p>
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {event.description}
+              </p>
             </div>
           )}
 
@@ -162,5 +179,5 @@ export function EventDetails({ event, userId }: EventDetailsProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -14,37 +14,37 @@ import {
   isSameDay,
   isToday,
   parseISO,
-} from "date-fns"
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
+} from "date-fns";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 interface Event {
-  id: string
-  title: string
-  start_time: string
-  end_time: string
-  description: string | null
+  id: string;
+  title: string;
+  start_time: string;
+  end_time: string;
+  description: string | null;
 }
 
 interface EventCalendarProps {
-  userId: string
+  userId: string;
 }
 
 export function EventCalendar({ userId }: EventCalendarProps) {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [events, setEvents] = useState<Event[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadEvents()
-  }, [currentDate, userId])
+    loadEvents();
+  }, [currentDate, userId]);
 
   const loadEvents = async () => {
-    setIsLoading(true)
-    const supabase = createClient()
+    setIsLoading(true);
+    const supabase = createClient();
 
-    const monthStart = startOfMonth(currentDate)
-    const monthEnd = endOfMonth(currentDate)
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
 
     const { data, error } = await supabase
       .from("events")
@@ -52,29 +52,33 @@ export function EventCalendar({ userId }: EventCalendarProps) {
       .eq("created_by", userId)
       .gte("start_time", monthStart.toISOString())
       .lte("start_time", monthEnd.toISOString())
-      .order("start_time", { ascending: true })
+      .order("start_time", { ascending: true });
 
     if (!error && data) {
-      setEvents(data)
+      setEvents(data);
     }
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
-  const monthStart = startOfMonth(currentDate)
-  const monthEnd = endOfMonth(currentDate)
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const previousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))
-  }
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1),
+    );
+  };
 
   const nextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))
-  }
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1),
+    );
+  };
 
   const getEventsForDay = (day: Date) => {
-    return events.filter((event) => isSameDay(parseISO(event.start_time), day))
-  }
+    return events.filter((event) => isSameDay(parseISO(event.start_time), day));
+  };
 
   return (
     <Card>
@@ -94,14 +98,17 @@ export function EventCalendar({ userId }: EventCalendarProps) {
       <CardContent>
         <div className="grid grid-cols-7 gap-2">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+            <div
+              key={day}
+              className="text-center text-sm font-medium text-muted-foreground py-2"
+            >
               {day}
             </div>
           ))}
           {daysInMonth.map((day) => {
-            const dayEvents = getEventsForDay(day)
-            const isCurrentMonth = isSameMonth(day, currentDate)
-            const isCurrentDay = isToday(day)
+            const dayEvents = getEventsForDay(day);
+            const isCurrentMonth = isSameMonth(day, currentDate);
+            const isCurrentDay = isToday(day);
 
             return (
               <div
@@ -110,29 +117,38 @@ export function EventCalendar({ userId }: EventCalendarProps) {
                   !isCurrentMonth ? "bg-muted/50" : ""
                 } ${isCurrentDay ? "border-primary" : ""}`}
               >
-                <div className={`text-sm font-medium mb-1 ${isCurrentDay ? "text-primary" : ""}`}>
+                <div
+                  className={`text-sm font-medium mb-1 ${isCurrentDay ? "text-primary" : ""}`}
+                >
                   {format(day, "d")}
                 </div>
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((event) => (
-                    <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block">
+                    <Link
+                      key={event.id}
+                      href={`/dashboard/events/${event.id}`}
+                      className="block"
+                    >
                       <Badge
                         variant="secondary"
                         className="w-full text-xs truncate cursor-pointer hover:bg-secondary/80"
                       >
-                        {format(parseISO(event.start_time), "HH:mm")} {event.title}
+                        {format(parseISO(event.start_time), "HH:mm")}{" "}
+                        {event.title}
                       </Badge>
                     </Link>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="text-xs text-muted-foreground">+{dayEvents.length - 2} more</div>
+                    <div className="text-xs text-muted-foreground">
+                      +{dayEvents.length - 2} more
+                    </div>
                   )}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

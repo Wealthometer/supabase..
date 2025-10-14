@@ -1,13 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function AuthErrorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const params = await searchParams
+  const params = await searchParams;
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-6">
@@ -18,9 +18,13 @@ export default async function AuthErrorPage({
           </CardHeader>
           <CardContent className="space-y-4">
             {params?.error ? (
-              <p className="text-sm text-muted-foreground">Error: {params.error}</p>
+              <p className="text-sm text-muted-foreground">
+                Error: {params.error}
+              </p>
             ) : (
-              <p className="text-sm text-muted-foreground">An authentication error occurred.</p>
+              <p className="text-sm text-muted-foreground">
+                An authentication error occurred.
+              </p>
             )}
             <Button asChild className="w-full">
               <Link href="/auth/login">Back to Login</Link>
@@ -29,5 +33,5 @@ export default async function AuthErrorPage({
         </Card>
       </div>
     </div>
-  )
+  );
 }
