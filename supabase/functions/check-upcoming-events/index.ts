@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Deno } from "https://deno.land/std@0.168.0/node/deno.ts";
+// ✅ Modern imports
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,12 +8,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+serve(async (req: Request): Promise<Response> => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // ✅ Initialize Supabase client using environment vars
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -23,21 +25,19 @@ serve(async (req) => {
     const now = new Date();
     const fifteenMinutesFromNow = new Date(now.getTime() + 15 * 60 * 1000);
 
-    // Find events starting in the next 15 minutes
+    // Fetch upcoming events
     const { data: upcomingEvents, error: eventsError } = await supabaseClient
       .from("events")
       .select("*, user_preferences!events_created_by_fkey(discord_webhook_url)")
       .gte("start_time", now.toISOString())
       .lte("start_time", fifteenMinutesFromNow.toISOString());
 
-    if (eventsError) {
-      throw eventsError;
-    }
+    if (eventsError) throw eventsError;
 
-    const results = [];
+    const results: any[] = [];
 
     for (const event of upcomingEvents || []) {
-      // Check if notification already exists and was sent
+      // Skip if already sent
       const { data: existingNotification } = await supabaseClient
         .from("notifications")
         .select("*")
@@ -46,20 +46,16 @@ serve(async (req) => {
         .eq("sent", true)
         .single();
 
-      if (existingNotification) {
-        continue; // Skip if already sent
-      }
+      if (existingNotification) continue;
 
-      // Get user preferences for webhook URL
       const webhookUrl = event.user_preferences?.discord_webhook_url;
-
       if (!webhookUrl) {
         console.log(`No webhook URL for event ${event.id}`);
         continue;
       }
 
       try {
-        // Send notification
+        // Trigger your send-discord-notification function
         const notificationResponse = await fetch(
           `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-discord-notification`,
           {
@@ -70,14 +66,13 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               eventId: event.id,
-              webhookUrl: webhookUrl,
+              webhookUrl,
               channelId: event.discord_channel_id,
             }),
           },
         );
 
         if (notificationResponse.ok) {
-          // Create or update notification record
           await supabaseClient.from("notifications").upsert({
             event_id: event.id,
             notification_type: "discord",
@@ -89,6 +84,7 @@ serve(async (req) => {
           results.push({ eventId: event.id, status: "sent" });
         } else {
           const errorText = await notificationResponse.text();
+
           await supabaseClient.from("notifications").upsert({
             event_id: event.id,
             notification_type: "discord",
@@ -104,12 +100,10 @@ serve(async (req) => {
           });
         }
       } catch (error) {
-        console.error(`Error processing event ${event.id}:`, error);
-        results.push({
-          eventId: event.id,
-          status: "error",
-          error: error.message,
-        });
+        const errMsg =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        console.error(`Error processing event ${event.id}:`, errMsg);
+        results.push({ eventId: event.id, status: "error", error: errMsg });
       }
     }
 
@@ -125,8 +119,10 @@ serve(async (req) => {
       },
     );
   } catch (error) {
-    console.error("Error checking upcoming events:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errMsg =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Error checking upcoming events:", errMsg);
+    return new Response(JSON.stringify({ error: errMsg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });
