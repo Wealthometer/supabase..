@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "EventSync",
   description: "Event management and synchronization platform",
   icons: {
-    icon: "/favicon.ico",
+    icon: "../public/logo.svg",
   },
 };
 
